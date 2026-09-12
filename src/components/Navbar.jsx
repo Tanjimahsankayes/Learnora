@@ -12,6 +12,10 @@ import {
   FaBell,
   FaUser,
   FaRightFromBracket,
+  FaGaugeHigh,
+  FaGraduationCap,
+  FaBookmark,
+  FaGear,
 } from "react-icons/fa6";
 import { RiSparkling2Line } from "react-icons/ri";
 import { useSession, signOut } from "@/lib/auth-client";
@@ -22,12 +26,11 @@ export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession();
   const user = session?.user;
 
   // Better Auth session থেকে login status
   const isLoggedIn = !!user;
-
 
   const searchRef = useRef(null);
   const profileRef = useRef(null);
@@ -44,7 +47,6 @@ export default function Navbar() {
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -61,7 +63,6 @@ export default function Navbar() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
@@ -72,35 +73,69 @@ export default function Navbar() {
     "book-seller": "/dashboard/book-seller",
   };
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Courses", href: "/courses" },
-    { name: "Books", href: "/books" },
-    { name: "Quiz", href: "/all-quiz" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
+  const userDashboard = dashboardPath[user?.role] || "/dashboard/student";
+
+  // Navigation Links filtering based on login state
+  const rawNavLinks = [
+    { name: "Home", href: "/", showFor: "guest" },
+    { name: "Courses", href: "/courses", showFor: "all" },
+    { name: "Books", href: "/books", showFor: "all" },
+    { name: "Quiz", href: "/all-quiz", showFor: "authenticated" },
+    { name: "About", href: "/about", showFor: "guest" },
+    { name: "Contact", href: "/contact", showFor: "guest" },
     ...(isLoggedIn && dashboardPath[user?.role]
       ? [
           {
             name: "Dashboard",
-            href: dashboardPath[user.role],
+            href: userDashboard,
+            showFor: "authenticated",
           },
         ]
       : []),
   ];
 
-  console.log("User:", user);
-  console.log("Role:", user?.role);
-  // ================= LOGOUT =================
+  const navLinks = rawNavLinks.filter((link) => {
+    if (link.showFor === "guest") return !isLoggedIn;
+    if (link.showFor === "authenticated") return isLoggedIn;
+    return true;
+  });
+
+  // Profile Dropdown Links
+  const profileDropdownLinks = [
+    { name: "Dashboard", href: userDashboard, icon: FaGaugeHigh },
+    { name: "My Profile", href: `${userDashboard}/profile`, icon: FaUser },
+    {
+      name: "My Courses",
+      href: `${userDashboard}/courses`,
+      icon: FaGraduationCap,
+    },
+    { name: "Saved Books", href: `${userDashboard}/books`, icon: FaBookmark },
+    { name: "My Cart", href: "/cart", icon: FaCartShopping },
+    { name: "Settings", href: `${userDashboard}/settings`, icon: FaGear },
+  ];
+
+  // LOGOUT
   const handleLogout = async () => {
     try {
       await signOut();
-
       setIsProfileDropdownOpen(false);
       setIsMobileMenuOpen(false);
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+
+  // Helper for User Avatar Initial
+  const getUserInitials = () => {
+    if (user?.name) {
+      return user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return "US";
   };
 
   return (
@@ -113,59 +148,53 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 relative">
-          {/* LOGO SECTION */}
+          {/* LOGO SECTION (Left) */}
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-3 group">
-              {/* Animated Glowing Icon Container */}
               <div className="relative flex items-center justify-center">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-violet-600 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-300"></div>
-
                 <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md transition-transform duration-300 group-hover:rotate-3">
                   <FaBookOpen className="w-5 h-5 text-white" />
-
                   <RiSparkling2Line className="w-2.5 h-2.5 text-amber-300 absolute top-1.5 right-1.5 animate-pulse" />
                 </div>
               </div>
 
-              {/* Logo Typography */}
               <div className="flex flex-col">
                 <div className="flex items-center gap-1">
                   <span className="text-2xl font-black tracking-tight text-white font-sans">
                     Learn<span className="text-blue-500">ora</span>
                   </span>
-
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></span>
                 </div>
-
                 <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase -mt-0.5 group-hover:text-blue-400 transition-colors">
                   Digital Edu Marketplace
                 </span>
               </div>
             </Link>
-
-            {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center text-center justify-center gap-1 xl:gap-2">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.href;
-
-                return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className={`relative px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                      isActive
-                        ? "text-blue-400 bg-blue-500/10 border border-blue-500/20"
-                        : "text-slate-300 hover:text-white hover:bg-slate-900"
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                );
-              })}
-            </nav>
           </div>
 
-          {/* Right Action Icons & Auth */}
+          {/* DESKTOP NAVIGATION LINKS (Centered) */}
+          <nav className="hidden lg:flex items-center justify-center gap-1 xl:gap-2 absolute left-1/2 -translate-x-1/2">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`relative px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    isActive
+                      ? "text-blue-400 bg-blue-500/10 border border-blue-500/20"
+                      : "text-slate-300 hover:text-white hover:bg-slate-900"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* RIGHT ACTION ICONS & AUTH (Right) */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* EXPANDABLE SEARCH BAR */}
             <div ref={searchRef} className="relative flex items-center">
@@ -178,9 +207,7 @@ export default function Navbar() {
                       autoFocus
                       className="w-full pl-10 pr-10 py-2 text-sm bg-slate-900 border border-blue-500/40 rounded-full text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-sm"
                     />
-
                     <FaMagnifyingGlass className="w-3.5 h-3.5 text-blue-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-
                     <button
                       onClick={() => setIsSearchOpen(false)}
                       className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors"
@@ -200,7 +227,7 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* ================= CONDITIONALLY RENDERED ICONS ================= */}
+            {/* LOGGED IN ICONS */}
             {isLoggedIn && (
               <>
                 {/* Cart Icon */}
@@ -210,7 +237,6 @@ export default function Navbar() {
                   aria-label="Cart"
                 >
                   <FaCartShopping className="w-4 h-4" />
-
                   <span className="absolute top-1 right-1 w-4 h-4 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-slate-950">
                     2
                   </span>
@@ -222,49 +248,73 @@ export default function Navbar() {
                   aria-label="Notifications"
                 >
                   <FaBell className="w-4 h-4" />
-
                   <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-slate-950"></span>
                 </button>
 
-                {/* Divider */}
+                {/* Vertical Divider */}
                 <div className="h-6 w-[1px] bg-slate-800 mx-1 hidden sm:block"></div>
               </>
             )}
 
-            {/* AUTHENTICATION BUTTONS / PROFILE DROPDOWN */}
+            {/* AUTHENTICATION BUTTONS / ENHANCED PROFILE DROPDOWN */}
             {isLoggedIn ? (
-              /* Logged In User Avatar Dropdown */
               <div ref={profileRef} className="relative">
                 <button
                   onClick={() =>
                     setIsProfileDropdownOpen(!isProfileDropdownOpen)
                   }
-                  className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-900 transition-colors border border-slate-800"
+                  className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-900 transition-colors border border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
-                    ST
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
+                    {getUserInitials()}
                   </div>
                 </button>
 
                 {/* Profile Menu Dropdown */}
                 {isProfileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <Link
-                      href={dashboardPath[user?.role] || "/dashboard/student"}
-                      onClick={() => setIsProfileDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800"
-                    >
-                      <FaUser className="w-3.5 h-3.5 text-blue-400" />
-                      My Profile
-                    </Link>
+                  <div className="absolute right-0 mt-3 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    {/* User Header Section */}
+                    <div className="px-4 py-3 border-b border-slate-800/80 mb-1">
+                      <p className="text-xs font-bold text-white truncate">
+                        {user?.name || "User Account"}
+                      </p>
+                      <p className="text-[11px] font-medium text-slate-400 truncate">
+                        {user?.email || "user@learnora.com"}
+                      </p>
+                      {user?.role && (
+                        <span className="inline-block mt-1.5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-md">
+                          {user.role}
+                        </span>
+                      )}
+                    </div>
 
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 text-left"
-                    >
-                      <FaRightFromBracket className="w-3.5 h-3.5" />
-                      Logout
-                    </button>
+                    {/* Navigation Links inside Dropdown */}
+                    <div className="py-1">
+                      {profileDropdownLinks.map((item) => {
+                        const IconComponent = item.icon;
+                        return (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors"
+                          >
+                            <IconComponent className="w-3.5 h-3.5 text-blue-400" />
+                            {item.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+
+                    <div className="border-t border-slate-800/80 pt-1 mt-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors text-left"
+                      >
+                        <FaRightFromBracket className="w-3.5 h-3.5" />
+                        Logout
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

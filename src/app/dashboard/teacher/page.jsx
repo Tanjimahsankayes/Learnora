@@ -118,7 +118,7 @@ const TeacherProfile = () => {
 
             {/* Action Button */}
             <Link
-              href="/teacher/create-course"
+              href="/dashboard/teacher/create-course"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 text-white font-medium hover:bg-purple-500 transition-all text-xs sm:text-sm shadow-lg shadow-purple-600/20 active:scale-95"
             >
               <PlusCircle className="w-4 h-4" />
