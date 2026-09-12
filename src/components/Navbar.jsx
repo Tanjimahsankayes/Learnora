@@ -14,6 +14,7 @@ import {
   FaRightFromBracket,
 } from "react-icons/fa6";
 import { RiSparkling2Line } from "react-icons/ri";
+import { useSession, signOut } from "@/lib/auth-client";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -21,8 +22,12 @@ export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  // Demo Login State (আপনার Better Auth বা Auth logic দিয়ে এটি টেস্ট করতে পারেন)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
+
+  // Better Auth session থেকে login status
+  const isLoggedIn = !!user;
+
 
   const searchRef = useRef(null);
   const profileRef = useRef(null);
@@ -37,7 +42,9 @@ export default function Navbar() {
         setIsScrolled(false);
       }
     };
+
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -47,13 +54,23 @@ export default function Navbar() {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setIsSearchOpen(false);
       }
+
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileDropdownOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const dashboardPath = {
+    student: "/dashboard/student",
+    teacher: "/dashboard/teacher",
+    admin: "/dashboard/admin",
+    "book-seller": "/dashboard/book-seller",
+  };
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -61,7 +78,27 @@ export default function Navbar() {
     { name: "Books", href: "/books" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
+    ...(isLoggedIn && dashboardPath[user?.role]
+      ? [
+          {
+            name: "Dashboard",
+            href: dashboardPath[user.role],
+          },
+        ]
+      : []),
   ];
+
+  // ================= LOGOUT =================
+  const handleLogout = async () => {
+    try {
+      await signOut();
+
+      setIsProfileDropdownOpen(false);
+      setIsMobileMenuOpen(false);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <header
@@ -79,8 +116,10 @@ export default function Navbar() {
               {/* Animated Glowing Icon Container */}
               <div className="relative flex items-center justify-center">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-violet-600 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-300"></div>
+
                 <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md transition-transform duration-300 group-hover:rotate-3">
                   <FaBookOpen className="w-5 h-5 text-white" />
+
                   <RiSparkling2Line className="w-2.5 h-2.5 text-amber-300 absolute top-1.5 right-1.5 animate-pulse" />
                 </div>
               </div>
@@ -91,8 +130,10 @@ export default function Navbar() {
                   <span className="text-2xl font-black tracking-tight text-white font-sans">
                     Learn<span className="text-blue-500">ora</span>
                   </span>
+
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></span>
                 </div>
+
                 <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase -mt-0.5 group-hover:text-blue-400 transition-colors">
                   Digital Edu Marketplace
                 </span>
@@ -100,9 +141,10 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+            <nav className="hidden lg:flex items-center text-center justify-center gap-1 xl:gap-2">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
+
                 return (
                   <Link
                     key={link.name}
@@ -133,7 +175,9 @@ export default function Navbar() {
                       autoFocus
                       className="w-full pl-10 pr-10 py-2 text-sm bg-slate-900 border border-blue-500/40 rounded-full text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-sm"
                     />
+
                     <FaMagnifyingGlass className="w-3.5 h-3.5 text-blue-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+
                     <button
                       onClick={() => setIsSearchOpen(false)}
                       className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-white rounded-full hover:bg-slate-800 transition-colors"
@@ -163,6 +207,7 @@ export default function Navbar() {
                   aria-label="Cart"
                 >
                   <FaCartShopping className="w-4 h-4" />
+
                   <span className="absolute top-1 right-1 w-4 h-4 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-slate-950">
                     2
                   </span>
@@ -174,6 +219,7 @@ export default function Navbar() {
                   aria-label="Notifications"
                 >
                   <FaBell className="w-4 h-4" />
+
                   <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-slate-950"></span>
                 </button>
 
@@ -201,18 +247,16 @@ export default function Navbar() {
                 {isProfileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                     <Link
-                      href="/student/profile"
+                      href={dashboardPath[user?.role] || "/dashboard/student"}
                       onClick={() => setIsProfileDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800"
                     >
                       <FaUser className="w-3.5 h-3.5 text-blue-400" />
                       My Profile
                     </Link>
+
                     <button
-                      onClick={() => {
-                        setIsLoggedIn(false);
-                        setIsProfileDropdownOpen(false);
-                      }}
+                      onClick={handleLogout}
                       className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 text-left"
                     >
                       <FaRightFromBracket className="w-3.5 h-3.5" />
@@ -225,13 +269,14 @@ export default function Navbar() {
               /* Guest User Auth Buttons */
               <div className="hidden sm:flex items-center gap-2">
                 <Link
-                  href="/login"
+                  href="/auth/signin"
                   className="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors"
                 >
                   Log in
                 </Link>
+
                 <Link
-                  href="/register"
+                  href="/auth/signup"
                   className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 active:scale-95 rounded-xl shadow-lg shadow-blue-600/20 transition-all duration-200"
                 >
                   Get Started
@@ -280,14 +325,15 @@ export default function Navbar() {
             {!isLoggedIn ? (
               <>
                 <Link
-                  href="/login"
+                  href="/auth/signin"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="w-full py-2.5 text-center font-semibold text-slate-300 bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors border border-slate-800"
                 >
                   Log in
                 </Link>
+
                 <Link
-                  href="/register"
+                  href="/auth/signup"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="w-full py-2.5 text-center font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-lg shadow-blue-600/20 transition-colors"
                 >
@@ -296,10 +342,7 @@ export default function Navbar() {
               </>
             ) : (
               <button
-                onClick={() => {
-                  setIsLoggedIn(false);
-                  setIsMobileMenuOpen(false);
-                }}
+                onClick={handleLogout}
                 className="w-full py-2.5 text-center font-semibold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl transition-colors border border-rose-500/20"
               >
                 Logout
