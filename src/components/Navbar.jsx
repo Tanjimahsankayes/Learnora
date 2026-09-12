@@ -76,6 +76,7 @@ export default function Navbar() {
     { name: "Home", href: "/" },
     { name: "Courses", href: "/courses" },
     { name: "Books", href: "/books" },
+    { name: "Quiz", href: "/all-quiz" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
     ...(isLoggedIn && dashboardPath[user?.role]

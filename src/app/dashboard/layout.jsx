@@ -30,6 +30,7 @@ import { RiSparkling2Line } from "react-icons/ri";
 import { IoIosAdd } from "react-icons/io";
 import { CircleDollarSign } from "lucide-react";
 import { IoCreateSharp } from "react-icons/io5";
+import { MdOutlineQuiz } from "react-icons/md";
 
 export default function DashboardLayout({ children }) {
   const { data: session, isPending } = useSession();
@@ -81,7 +82,7 @@ export default function DashboardLayout({ children }) {
         icon: FaGraduationCap,
       },
       { name: "Live Sessions", href: "/dashboard/teacher/live", icon: FaVideo },
-      { name: "Quizzes", href: "/dashboard/teacher/live", icon: FaVideo },
+      { name: "Quizzes", href: "/dashboard/teacher/quiz", icon: MdOutlineQuiz },
       {
         name: "Student Progress",
         href: "/dashboard/teacher/students",
