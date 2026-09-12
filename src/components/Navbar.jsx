@@ -88,6 +88,8 @@ export default function Navbar() {
       : []),
   ];
 
+  console.log("User:", user);
+  console.log("Role:", user?.role);
   // ================= LOGOUT =================
   const handleLogout = async () => {
     try {

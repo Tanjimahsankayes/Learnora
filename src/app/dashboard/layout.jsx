@@ -24,9 +24,12 @@ import {
   FaHouse,
   FaBookmark,
   FaUserTag,
+  FaUserSecret,
 } from "react-icons/fa6";
 import { RiSparkling2Line } from "react-icons/ri";
 import { IoIosAdd } from "react-icons/io";
+import { CircleDollarSign } from "lucide-react";
+import { IoCreateSharp } from "react-icons/io5";
 
 export default function DashboardLayout({ children }) {
   const { data: session, isPending } = useSession();
@@ -62,6 +65,16 @@ export default function DashboardLayout({ children }) {
       { name: "Settings", href: "/dashboard/settings", icon: FaGear },
     ],
     teacher: [
+      {
+        name: "Profile",
+        href: "/dashboard/teacher",
+        icon: FaUserSecret,
+      },
+      {
+        name: "Create New Course",
+        href: "/dashboard/teacher/create-course",
+        icon: IoCreateSharp,
+      },
       {
         name: "Course Management",
         href: "/dashboard/teacher/courses",
@@ -106,6 +119,11 @@ export default function DashboardLayout({ children }) {
     ],
     admin: [
       {
+        name: "Profile",
+        href: "/dashboard/admin",
+        icon: FaUserShield,
+      },
+      {
         name: "Overview & Stats",
         href: "/dashboard/admin/overview",
         icon: FaChartLine,
@@ -121,7 +139,7 @@ export default function DashboardLayout({ children }) {
         href: "/dashboard/admin/books",
         icon: FaBook,
       },
-      { name: "Revenue", href: "/dashboard/settings", icon: FaGear },
+      { name: "Revenue", href: "/dashboard/settings", icon: CircleDollarSign },
       { name: "Settings", href: "/dashboard/settings", icon: FaGear },
     ],
   };
