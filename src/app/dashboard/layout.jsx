@@ -90,7 +90,7 @@ export default function DashboardLayout({ children }) {
       },
       { name: "Settings", href: "/dashboard/settings", icon: FaGear },
     ],
-    "book-seller": [
+    "book_seller": [
       {
         name: "My Profile",
         href: "/dashboard/book-seller",
@@ -159,7 +159,7 @@ export default function DashboardLayout({ children }) {
       badge: "Teacher",
       color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
     },
-    "book-seller": {
+    "book_seller": {
       title: "Seller Portal",
       icon: FaStore,
       badge: "Book Seller",

@@ -179,7 +179,7 @@ const ManageUsers = () => {
 
           {/* Role Filter Tabs */}
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            {["all", "student", "teacher", "book-seller", "admin"].map(
+            {["all", "student", "teacher", "book_seller", "admin"].map(
               (role) => (
                 <button
                   key={role}
@@ -250,7 +250,7 @@ const ManageUsers = () => {
                                 ? "bg-purple-500/10 border-purple-500/30 text-purple-400"
                                 : user.role === "teacher"
                                   ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
-                                  : user.role === "book-seller"
+                                  : user.role === "book_seller"
                                     ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
                                     : "bg-slate-800 border-slate-700 text-slate-300"
                             }`}
@@ -261,7 +261,7 @@ const ManageUsers = () => {
                             {user.role === "teacher" && (
                               <GraduationCap className="w-3.5 h-3.5" />
                             )}
-                            {user.role === "book-seller" && (
+                            {user.role === "book_seller" && (
                               <Store className="w-3.5 h-3.5" />
                             )}
                             {user.role === "student" && (
@@ -287,7 +287,7 @@ const ManageUsers = () => {
                           >
                             <option value="student">Student</option>
                             <option value="teacher">Teacher</option>
-                            <option value="book-seller">Book Seller</option>
+                            <option value="book_seller">Book Seller</option>
                             <option value="admin">Admin</option>
                           </select>
                         </td>

@@ -26,11 +26,8 @@ export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const user = session?.user;
-
-  // Better Auth session থেকে login status
-  const isLoggedIn = !!user;
 
   const searchRef = useRef(null);
   const profileRef = useRef(null);
@@ -69,11 +66,20 @@ export default function Navbar() {
   const dashboardPath = {
     student: "/dashboard/student",
     teacher: "/dashboard/teacher",
+    "book_seller": "/dashboard/book-seller",
     admin: "/dashboard/admin",
-    "book-seller": "/dashboard/book-seller",
   };
 
-  const userDashboard = dashboardPath[user?.role] || "/dashboard/student";
+  const role = user?.role?.toLowerCase();
+  const userDashboard = role ? dashboardPath[role] : null;
+  // const userDashboard = dashboardPath[user?.role] || "/dashboard/student";
+
+  const isLoggedIn = !!user;
+  const hasDashboardAccess = !!userDashboard;
+
+  console.log("USER ROLE:", user?.role);
+  console.log("NORMALIZED ROLE:", role);
+  console.log("USER DASHBOARD:", userDashboard);
 
   // Navigation Links filtering based on login state
   const rawNavLinks = [
@@ -83,7 +89,7 @@ export default function Navbar() {
     { name: "Quiz", href: "/all-quiz", showFor: "authenticated" },
     { name: "About", href: "/about", showFor: "guest" },
     { name: "Contact", href: "/contact", showFor: "guest" },
-    ...(isLoggedIn && dashboardPath[user?.role]
+    ...(isLoggedIn && hasDashboardAccess
       ? [
           {
             name: "Dashboard",
