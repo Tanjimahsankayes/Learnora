@@ -79,7 +79,7 @@ const MyBooksPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="rounded-3xl border border-slate-800 p-6 shadow-sm">
+      <div className="rounded-3xl border border-slate-900 p-6 shadow-sm">
         <MyBooks sellerEmail={session.user.email} />
       </div>
     </main>

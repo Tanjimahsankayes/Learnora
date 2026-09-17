@@ -109,7 +109,7 @@ export default function Navbar() {
   // Profile Dropdown Links
   const profileDropdownLinks = [
     { name: "Dashboard", href: userDashboard, icon: FaGaugeHigh },
-    { name: "My Profile", href: `${userDashboard}/profile`, icon: FaUser },
+    { name: "My Profile", href: `${userDashboard}`, icon: FaUser },
     {
       name: "My Courses",
       href: `${userDashboard}/courses`,
@@ -161,6 +161,11 @@ export default function Navbar() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-violet-600 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 group-hover:scale-105 transition duration-300"></div>
                 <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md transition-transform duration-300 group-hover:rotate-3">
                   <FaBookOpen className="w-5 h-5 text-white" />
+                  {/* <img
+                    src="/images/favicon.png"
+                    alt="learnora logo"
+                    className="w-8 h-8"
+                  /> */}
                   <RiSparkling2Line className="w-2.5 h-2.5 text-amber-300 absolute top-1.5 right-1.5 animate-pulse" />
                 </div>
               </div>

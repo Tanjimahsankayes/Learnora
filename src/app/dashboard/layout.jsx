@@ -85,7 +85,7 @@ export default function DashboardLayout({ children }) {
       { name: "Quizzes", href: "/dashboard/teacher/quiz", icon: MdOutlineQuiz },
       {
         name: "Student Progress",
-        href: "/dashboard/teacher/students",
+        href: "/dashboard/teacher/progress",
         icon: FaUsers,
       },
       { name: "Settings", href: "/dashboard/settings", icon: FaGear },

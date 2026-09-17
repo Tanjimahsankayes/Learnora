@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { useSession } from "@/lib/auth-client";
+import React, { useState } from "react";
+import { authClient, useSession } from "@/lib/auth-client";
 import {
   User,
   Mail,
@@ -16,12 +16,77 @@ import {
   Video,
   Award,
   ShieldAlert,
+  Camera,
 } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const TeacherProfile = () => {
   const { data: session, isPending } = useSession();
   const user = session?.user;
+
+  const [uploading, setUploading] = useState(false);
+  
+      const handleImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+  
+        if (!file) return;
+  
+        if (!file.type.startsWith("image/")) {
+          toast.error("Please select an image file.");
+          return;
+        }
+  
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error("Image size must be less than 5MB.");
+          return;
+        }
+  
+        try {
+          setUploading(true);
+  
+          const formData = new FormData();
+          formData.append("image", file);
+  
+          // Send image to YOUR backend
+          const response = await fetch("http://localhost:5000/api/upload-image", {
+            method: "POST",
+            body: formData,
+          });
+  
+          const data = await response.json();
+  
+          if (!response.ok || !data.success) {
+            throw new Error(data.message || "Image upload failed.");
+          }
+  
+          // ImgBB image URL
+          const imageUrl = data.imageUrl;
+  
+          console.log("ImgBB Image URL:", imageUrl);
+  
+          // Save ImgBB URL to Better Auth
+          const result = await authClient.updateUser({
+            image: imageUrl,
+          });
+  
+          if (result?.error) {
+            throw new Error(
+              result.error.message || "Failed to update profile image.",
+            );
+          }
+  
+          toast.success("Profile image updated successfully.");
+  
+          window.location.reload();
+        } catch (error) {
+          console.error("Image upload error:", error);
+          toast.error(error.message || "Failed to upload image.");
+        } finally {
+          setUploading(false);
+          e.target.value = "";
+        }
+      };
 
   // 1. Loading State
   if (isPending) {
@@ -84,9 +149,31 @@ const TeacherProfile = () => {
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 border-4 border-slate-900 shadow-xl flex items-center justify-center text-3xl font-bold text-white uppercase">
-                    {user.name?.slice(0, 2) || "TR"}
+                    {user.name?.slice(0, 2) || "BS"}
                   </div>
                 )}
+
+                {/* Upload Button */}
+                <label
+                  htmlFor="profile-image"
+                  className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-purple-600 hover:bg-purple-500 border-2 border-slate-900 flex items-center justify-center cursor-pointer transition-all shadow-lg"
+                  title="Change profile image"
+                >
+                  {uploading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-4 h-4 text-white" />
+                  )}
+
+                  <input
+                    id="profile-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="hidden"
+                  />
+                </label>
               </div>
 
               {/* Title & Email */}

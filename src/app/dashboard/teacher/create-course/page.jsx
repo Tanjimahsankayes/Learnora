@@ -15,12 +15,17 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 
 const API_BASE_URL = "http://localhost:5000/api/courses";
 
 const CreateCourse = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
+
 
   const [formData, setFormData] = useState({
     // Basic Info
@@ -46,6 +51,7 @@ const CreateCourse = () => {
     price: "",
     discountPrice: "",
     isFree: false,
+    userEmail: user.email,
   });
 
   const handleChange = (e) => {
